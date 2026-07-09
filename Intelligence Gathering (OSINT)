@@ -1,4 +1,4 @@
-Uncovering Secrets: A Deep Dive into the Dev Diaries TryHackMe Room
+                                                     Dev Diaries Writeup of tryhackme
 Author: Abouhafs Fatima Zahra
 Date: July 2026
 In the world of cybersecurity, a common misconception is that deleting files from a repository effectively removes them from existence. As we explore the Dev Diaries room on TryHackMe, we peel back the layers of Open Source Intelligence (OSINT) and version control security to demonstrate why Git history is a treasure trove for threat actors.

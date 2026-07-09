@@ -1,0 +1,58 @@
+                              Include Me - CTF Write-up
+Author: Fatima Ezzaahrae Abouhafs  
+Platform: HackerDNA  
+Lab: Include Me  
+Category: Web Security | Local File Inclusion (LFI)  
+Date: June 2026
+
+Objective: Identify the vulnerability and retrieve the hidden flag by analyzing how the web application handles file inclusion.
+1. Initial Website Analysis
+I accessed the web application and started with basic reconnaissance to understand how the application loads content and whether user input affects server-side file operations.
+ 
+2. Discovering the Vulnerable Parameter
+I tested URL parameters and discovered that the application uses a parameter named 'page'.
+Example:
+http://TARGET/index.php?page=test123.html
+The application returned an error message showing:
+Warning: include(test123.html): Failed to open stream
+This revealed that PHP include() was being used to load files.
+ 
+3. Identifying the Vulnerability
+The application was vulnerable to Local File Inclusion (LFI) because user-controlled input was passed into the include() function without proper validation.
+Concept:
+include($_GET['page']);
+4.Testing LFI Using /etc/passwd
+After identifying that the page parameter was being passed into the PHP include() function, the next step was to confirm whether the application could read local files from the server.
+
+The file /etc/passwd was used as a test file.
+Why /etc/passwd?
+The goal was not to find the flag inside this file. It was used because:
+It exists on almost every Linux system.
+It is usually readable by normal users.
+It contains information about system users.
+ 
+By requesting:
+/index.php?page=/etc/passwd
+and seeing the file contents displayed in the browser, it confirmed:
+The application can read local files from the server
+The Local File Inclusion (LFI) vulnerability exists
+User-controlled input is being used insecurely in the file inclusion process
+5. Exploiting the LFI Vulnerability
+After confirming the LFI vulnerability, I attempted to include a local file from the server.
+Payload:
+http://TARGET/index.php?page=/flag.txt
+ 
+The server successfully loaded the file and displayed the hidden flag.
+6. Vulnerability Impact
+Local File Inclusion vulnerabilities can allow attackers to read sensitive files from a server. Poor validation may expose configuration files, source code, credentials, or other sensitive data.
+7. Key Learning Points
+• User input must always be validated.
+• File inclusion functions should not directly accept user-controlled paths.
+• Error messages can reveal important technical details.
+• Manual web enumeration is an essential skill in cybersecurity.
+Tools & Techniques Used
+• Browser
+• URL parameter analysis
+• Error message analysis
+• LFI exploitation
+• Web enumeration

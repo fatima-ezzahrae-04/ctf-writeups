@@ -1,0 +1,35 @@
+Uncovering Secrets: A Deep Dive into the Dev Diaries TryHackMe Room
+Author: Abouhafs Fatima Zahra
+Date: July 2026
+In the world of cybersecurity, a common misconception is that deleting files from a repository effectively removes them from existence. As we explore the Dev Diaries room on TryHackMe, we peel back the layers of Open Source Intelligence (OSINT) and version control security to demonstrate why Git history is a treasure trove for threat actors.
+This walkthrough outlines the investigative process used to uncover sensitive information and hidden flags within a misconfigured development environment.
+
+Question 1 : What is the subdomain where the development version of the website is hosted?
+We start our investigation with the target domain: marvenly.com.
+Our first objective is to discover the subdomain where the development or testing version of the website is hosted.
+By visiting this website:whoisfreaks.com
+Answer: uat -testing-marvenly.com
+
+Question 2 : What is the GitHub username of the developer?
+Next, we look for clues left behind by the developers. During our OSINT research of the domain or associated web files, we uncover a GitHub username associated with this project: notvibecoder23.
+Answer: notvibecoder23
+ 
+
+Question 3 : What is the developer’s email address?
+To find the developer’s email, I checked the repository’s commit history.
+Now, we navigate to the developer’s public GitHub repository related to the site.
+When inspecting the project, we notice that the source code has been completely deleted. To find out why, we look at the Commit History (the project diary/log).
+In one of the final commits, the developer explicitly states the reason for deleting everything. It turns out there was an issue with getting paid for the work!
+Then, I used a classic trick: adding .patch to the commit URL to reveal metadata.
+answer: freelancedevbycoder23@gmail.com
+
+Question 4 : What reason did the developer mention in the commit history for removing the source code?
+By reviewing the commit messages, I found the explanation.
+The developer mentioned that the project was abandoned due to an issue with payment.
+Answer: the project was marked as abandoned due to a payment 
+
+Question 5 What is the value of the hidden flag?
+Interestingly, the flag can be found by exploring the commit history.
+I checked an earlier commit :
+answer: THM{g1t_h1st0ry_n3v3r_f0rg3ts}
+This room is an excellent reminder of why Git security is so important. Deleting code from the main folder does not erase it from the Git history! Attackers can easily look back at your old commits to find passwords, API keys, or hidden flags.

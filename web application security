@@ -1,0 +1,40 @@
+                                 picoCTF 2026 - Old Sessions Write-up
+
+Challenge Information
+Challenge Name: Old Sessions
+Category: Web Exploitation
+Platform: [CyLab Security Academy](https://learn.cylabacademy.org/library/739?page=1&difficulty=1&event=79&category=1&workspace=true)
+
+Vulnerability Overview:
+Proper session timeout controls are critical for securing user accounts. If session expiration dates are misconfigured, active session tokens can remain valid indefinitely on the server. An attacker who gains access to these active tokens can perform a Session Hijacking attack, bypassing authentication entirely to log in as another user without needing credentials.
+
+Step-by-Step Solution
+
+1. Information Gathering
+Upon launching the challenge instance and inspecting the homepage ("The New Twitter"), a user comment left by mary_jones_8992 points toward a hidden directory:
+> "Hey I found a strange page at /sessions"
+
+Navigating to the /sessions path reveals a public list of active session tokens stored on the server:
+1. session:yNJnfXmWKDfawGa7-hYEPiYSXyGpUS80KnhyQ7Bi1GY -> {'key': 'admin'}
+2. session:8kAKSIlTHjZf44d26uUjnea9Vsojv70AXpiG1YHGvEQ -> {'key': 'user'}
+
+2. Inspecting Local Cookies
+1. Open the browser's Developer Tools by pressing F12 (or right-clicking the page and selecting Inspect).
+2. Navigate to the Application tab (Chrome/Edge) or Storage tab (Firefox/Safari).
+3. In the left-hand sidebar, expand the Cookies section and select the challenge website URL.
+4. Notice that your current browser session matches the standard user token value (8kAKSIlTHjZf44d26uUjnea9Vsojv70AXpiG1YHGvEQ).
+
+3. Session Hijacking (The Exploit)
+1. Double-click the value of your active session cookie inside the DevTools panel to edit it.
+2. Replace your token with the exposed administrator token: yNJnfXmWKDfawGa7-hYEPiYSXyGpUS80KnhyQ7Bi1GY
+3. Hit Enter to save the changes.
+4. Refresh the homepage.
+
+Result & Flag
+After refreshing, the server reads the updated cookie and authenticates the browser session as the administrator account. The homepage updates to display "Welcome admin" along with the hidden flag:
+
+picoCTF{s3t_s3ss10n_3xp1rat10n5_efbf6d5f}
+
+Remediation & Defense
+- Enforce Strict Timeouts: Implement server-side session expiration limits to ensure inactive sessions are automatically invalidated.
+- Secure Cookie Attributes: Protect session identifiers by setting the HttpOnly flag (prevents access via client-side scripts) and the Secure flag (ensures tokens are only transmitted over encrypted connections).
